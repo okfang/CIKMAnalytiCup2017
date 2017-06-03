@@ -54,7 +54,7 @@ def extract_features(iter,savepath):
             centre = []
             frequency = []
             #逐层提取特征
-            for h in range(3,4):
+            for h in range(0,4):
                 #15个时间点的一圈圈总量
                 sum_set = []
                 for t in range(15):
@@ -72,7 +72,7 @@ def extract_features(iter,savepath):
                         each_time_ring.append((sum_set[t][a] - sum_set[t][a+2])/((101-2*a)**2-(101-2*a-4)**2))
                     ring_set.append(each_time_ring)
                 #加入最后一个时间点的特征
-                ring.append(ring_set[14])
+                ring.extend(ring_set[14])
 
 
                 for a in range(25):
@@ -81,7 +81,7 @@ def extract_features(iter,savepath):
                         group.append(ring_set[t][a])
                     ring.append(np.var(group))
                     ring.append(np.mean(group))
-                    ring.append(np.pth(group))
+                    ring.append(np.ptp(group))
                     ring.append(1 if group[14] >= np.max(group) else 0)
                     ring.append(np.max(group) - group[14])
                     ring.append(group[14] - np.min(group))
@@ -124,7 +124,7 @@ def extract_features(iter,savepath):
                 centre.append(centre_average_set[14])
                 centre.append(np.var(centre_average_set))
                 centre.append(np.mean(centre_average_set))
-                centre.append(np.pth(centre_average_set))
+                centre.append(np.ptp(centre_average_set))
                 centre.append(1 if centre_average_set[14] >= np.max(centre_average_set) else 0)
                 centre.append(np.max(centre_average_set) - centre_average_set[14])
                 centre.append(centre_average_set[14] - np.min(centre_average_set))
@@ -135,7 +135,7 @@ def extract_features(iter,savepath):
                 centre.append(centre_average_set[14])
                 centre.append(np.var(centre_average_set))
                 centre.append(np.mean(centre_average_set))
-                centre.append(np.pth(centre_average_set))
+                centre.append(np.ptp(centre_average_set))
                 centre.append(1 if centre_average_set[14] >= np.max(centre_average_set) else 0)
                 centre.append(np.max(centre_average_set) - centre_average_set[14])
                 centre.append(centre_average_set[14] - np.min(centre_average_set))
@@ -146,7 +146,7 @@ def extract_features(iter,savepath):
                 centre.append(centre_average_set[14])
                 centre.append(np.var(centre_average_set))
                 centre.append(np.mean(centre_average_set))
-                centre.append(np.pth(centre_average_set))
+                centre.append(np.ptp(centre_average_set))
                 centre.append(1 if centre_average_set[14] >= np.max(centre_average_set) else 0)
                 centre.append(np.max(centre_average_set) - centre_average_set[14])
                 centre.append(centre_average_set[14] - np.min(centre_average_set))
@@ -157,7 +157,7 @@ def extract_features(iter,savepath):
                 centre.append(centre_average_set[14])
                 centre.append(np.var(centre_average_set))
                 centre.append(np.mean(centre_average_set))
-                centre.append(np.pth(centre_average_set))
+                centre.append(np.ptp(centre_average_set))
                 centre.append(1 if centre_average_set[14] >= np.max(centre_average_set) else 0)
                 centre.append(np.max(centre_average_set) - centre_average_set[14])
                 centre.append(centre_average_set[14] - np.min(centre_average_set))
@@ -172,7 +172,7 @@ def extract_features(iter,savepath):
                 frequency.append(np.sum((last_time_map[h] > 100) & (last_time_map[h] <= 120)))
                 frequency.append(np.sum((last_time_map[h] > 120) & (last_time_map[h] <= 140)))
                 frequency.append(np.sum((last_time_map[h] > 140) & (last_time_map[h] <= 160)))
-                frequency.append(np.sum((last_time_map[h] > 160) & (last_time_map[h] <= 180)))
+                frequency.append(np.sum((last_time_map[h] > 160)))
 
             new_features.extend(lables[s])
             new_features.extend(ring)
