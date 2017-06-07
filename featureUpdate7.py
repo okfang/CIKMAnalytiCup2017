@@ -55,11 +55,6 @@ def extract_features(iter,savepath):
             frequency = []
             bit_map = []
             map_variance = []
-            height_statistics = []
-            #逐层提取特征
-            height_set1 = []
-            height_set2 = []
-            height_set3 = []
             for h in range(0,4):
                 #15个时间点的一圈圈总量
                 sum_set = []
@@ -185,24 +180,6 @@ def extract_features(iter,savepath):
                 #增加20*20个点
                 bit_map.extend(last_time_map[h,40:61,40:61].ravel())
 
-                #最后一个时序高度的统计特性：
-                height_set1.append(np.average(last_time_map[h, 45:56, 45:56]))
-                height_set2.append(np.average(last_time_map[h,40:61,40:61]))
-            # 最后一个时序高度的统计特性：
-            height_statistics.append(np.mean(height_set1))
-            height_statistics.append(np.var(height_set1))
-            height_statistics.append(np.ptp(height_set1))
-            height_statistics.append(1 if height_set1[3] >= np.max(height_set1) else 0)
-            height_statistics.append(np.max(height_set1) - height_set1[3])
-            height_statistics.append(height_set1[3] - np.min(height_set1))
-
-            height_statistics.append(np.mean(height_set2))
-            height_statistics.append(np.var(height_set2))
-            height_statistics.append(np.ptp(height_set2))
-            height_statistics.append(1 if height_set2[3] >= np.max(height_set2) else 0)
-            height_statistics.append(np.max(height_set2) - height_set2[3])
-            height_statistics.append(height_set2[3] - np.min(height_set2))
-
 
             new_features.extend(lables[s])
             new_features.extend(ring)
@@ -211,7 +188,6 @@ def extract_features(iter,savepath):
             new_features.extend(frequency)
             new_features.extend(bit_map)
             new_features.extend(map_variance)
-            new_features.extend(height_statistics)
             batch_features.append(new_features)
         batch_features = np.array(batch_features)
         np.savetxt(file,batch_features,fmt='%.2f', delimiter=',')
