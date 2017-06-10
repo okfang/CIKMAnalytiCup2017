@@ -166,12 +166,24 @@ def extract_features(iter,savepath):
                 # 增加20*20个点
                 bit_map.extend(last_time_map[h, 40:61, 40:61].ravel())
 
+                #增加五个特征4*5 = 20
+                frequency.append(np.sum(last_time_map[h] <= 20))
+                frequency.append(np.sum((last_time_map[h] > 20) & (last_time_map[h] <= 40)))
+                frequency.append(np.sum((last_time_map[h] > 40) & (last_time_map[h] <= 60)))
+                frequency.append(np.sum((last_time_map[h] > 60) & (last_time_map[h] <= 80)))
+                frequency.append(np.sum((last_time_map[h] > 80) & (last_time_map[h] <= 100)))
+                frequency.append(np.sum((last_time_map[h] > 100) & (last_time_map[h] <= 120)))
+                frequency.append(np.sum((last_time_map[h] > 120) & (last_time_map[h] <= 140)))
+                frequency.append(np.sum((last_time_map[h] > 140) & (last_time_map[h] <= 160)))
+                frequency.append(np.sum((last_time_map[h] > 160)))
+
             new_features.extend(lables[s])
             new_features.extend(ring)
             new_features.extend(centre)
             new_features.extend(bit_map)
             new_features.extend(map_variance)
             new_features.extend(local)
+            new_features.extend(frequency)
             batch_features.append(new_features)
 
         batch_features = np.array(batch_features)
@@ -189,8 +201,8 @@ local_step3 = 50
 train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\train_shuffle.txt"
 test_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_testA\\data_new\\CIKM2017_testA\\testA.txt"
 
-svae_train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_train10_1.csv"
-svae_test_path =  "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_test10_1.csv"
+svae_train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_train10_2.csv"
+svae_test_path =  "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_test10_2.csv"
 
 train_iter = read_data_sets(train_path,batch_size)
 extract_features(train_iter,svae_train_path)
@@ -201,8 +213,8 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import mean_squared_error
 
-train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_train10_1.csv"
-test_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_test10_1.csv"
+train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_train10_2.csv"
+test_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_test10_2.csv"
 data = pd.read_csv(train_path,header=None)
 # test_data = pd.read_csv(test_path,header=None)
 # test = test_data.iloc[:,1:]
