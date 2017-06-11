@@ -75,7 +75,7 @@ def extract_features(iter,savepath):
                     for k in range(0, 51, centre_step):
                         each_time_sum.append(np.sum(sample[t, h, k:101 - k, k:101 - k]))
                     sum_set.append(each_time_sum)
-                # 提取一环环的变化：
+                # 提取一环环的平均值：25环
                 ring_set = []
                 for t in range(15):
                     each_time_ring = []
@@ -83,9 +83,9 @@ def extract_features(iter,savepath):
                         each_time_ring.append(
                             (sum_set[t][a] - sum_set[t][a + 2]) / ((101 - 2 * a) ** 2 - (101 - 2 * a - 4) ** 2))  # 25个环
                     ring_set.append(each_time_ring)
-                # 加入最后一个时间点的环特征
-                ring.extend(ring_set[14])
-                # 提取15个时序环的统计特性，
+                    #15个时间点，4层高度，15*4*25=1500 特征
+                    ring.extend(each_time_ring)
+                # 提取15个时序环的统计特性，25*4*7
                 for a in range(25):
                     group = []
                     for t in range(15):
@@ -100,13 +100,14 @@ def extract_features(iter,savepath):
                     A = np.vstack([np.arange(15), np.ones(15)]).T
                     m, c = np.linalg.lstsq(A, np.array(group))[0]
                     ring.append(m)
-                    ring.append(c)
 
+                #中心范围的特征(4*7+4*15+4*15)*2
                 centre_average_set = []
                 for time in sample[:, h, 45:56, 45:56]:
                     centre_average_set.append(np.average(time))
+                    #各点数据的方差
                     map_variance.append(np.var(time))
-                centre.append(centre_average_set[14])
+                centre.extend(centre_average_set)
                 centre.append(np.var(centre_average_set))
                 centre.append(np.mean(centre_average_set))
                 centre.append(np.ptp(centre_average_set))
@@ -118,13 +119,12 @@ def extract_features(iter,savepath):
                 A = np.vstack([np.arange(15), np.ones(15)]).T
                 m, c = np.linalg.lstsq(A, np.array(centre_average_set))[0]
                 centre.append(m)
-                centre.append(c)
 
                 centre_average_set = []
                 for time in sample[:, h, 40:61, 40:61]:
                     centre_average_set.append(np.average(time))
                     map_variance.append(np.var(time))
-                centre.append(centre_average_set[14])
+                centre.extend(centre_average_set)
                 centre.append(np.var(centre_average_set))
                 centre.append(np.mean(centre_average_set))
                 centre.append(np.ptp(centre_average_set))
@@ -136,11 +136,10 @@ def extract_features(iter,savepath):
                 A = np.vstack([np.arange(15), np.ones(15)]).T
                 m, c = np.linalg.lstsq(A, np.array(centre_average_set))[0]
                 centre.append(m)
-                centre.append(c)
 
                 # 2.提取局部区域的平均反射率
                 for step in [20,50,100]:
-                    local_variance = []
+                    local_average = []
                     for row in range(0, 101, step):
                         if row == 100:
                             break
@@ -149,29 +148,48 @@ def extract_features(iter,savepath):
                                 break
                             local_area_reflection = np.average(
                                 last_time_map[h, row:row + step, col:col + step])
-                            local_variance.append(local_area_reflection)
-                            local.append(local_area_reflection)
+                            local_average.append(local_area_reflection)
                             # 3.提取区域不同时序的方差（波动）10*10*4=400
                             local_sum_list = []
                             for time in sample[:, h, row:row + step, col:col + step]:
                                 local_sum_list.append(np.average(time))
+                                #将所有时序的局部特征都加入
+                                local.append(np.average(time))
                             local.append(np.var(local_sum_list))
                             local.append(np.mean(local_sum_list))
                             local.append(np.ptp(local_sum_list))
-                            centre.append(1 if local_sum_list[14] >= np.max(local_sum_list) else 0)
-                            centre.append(np.max(local_sum_list) - local_sum_list[14])
-                            centre.append(local_sum_list[14] - np.min(local_sum_list))
-                            if step != 10:
-                                A = np.vstack([np.arange(15), np.ones(15)]).T
-                                m, c = np.linalg.lstsq(A, np.array(local_sum_list))[0]
-                                local.append(m)
-                                local.append(c)
-                    map_variance.append(np.var(local_variance))
+                            local.append(1 if local_sum_list[14] >= np.max(local_sum_list) else 0)
+                            local.append(np.max(local_sum_list) - local_sum_list[14])
+                            local.append(local_sum_list[14] - np.min(local_sum_list))
 
-                # 增加20*20个点
+                            A = np.vstack([np.arange(15), np.ones(15)]).T
+                            m, c = np.linalg.lstsq(A, np.array(local_sum_list))[0]
+                            local.append(m)
+                    # 只加入最后一个时序的局部数据
+                    map_variance.append(np.var(local_average))
+
+                #通过局部平均值的方差沿时间变化，提取整体的变化趋势
+                for step in [10,20,50]:
+                    local_variance = []
+                    for t in range(15):
+                            local_average = []
+                            for row in range(0, 101, step):
+                                if row == 100:
+                                    break
+                                for col in range(0, 101, step):
+                                    if col == 100:
+                                        break
+                                    #每个时间点的局部平均值
+                                    local_average.append(np.average(sample[t, h, row:row + step, col:col + step]))
+                            local_variance.append(np.var(local_average))
+                    A = np.vstack([np.arange(15), np.ones(15)]).T
+                    m, c = np.linalg.lstsq(A, np.array(local_variance))[0]
+                    local.append(m)
+
+                # 增加中心20*20=400个点
                 bit_map.extend(last_time_map[h, 40:61, 40:61].ravel())
 
-                #增加五个特征4*5 = 20
+                #增加五个特征4*9= 36
                 frequency.append(np.sum(last_time_map[h] <= 20))
                 frequency.append(np.sum((last_time_map[h] > 20) & (last_time_map[h] <= 40)))
                 frequency.append(np.sum((last_time_map[h] > 40) & (last_time_map[h] <= 60)))
@@ -186,7 +204,7 @@ def extract_features(iter,savepath):
                 height_set1.append(np.average(last_time_map[h, 45:56, 45:56]))
                 height_set2.append(np.average(last_time_map[h, 40:61, 40:61]))
                 height_set3.append(np.average(last_time_map[h]))
-                # 最后一个时序高度的统计特性：
+            # 最后一个时序高度的统计特性：
             for height_set in [height_set1,height_set2,height_set3]:
                 height_statistics.append(np.mean(height_set))
                 height_statistics.append(np.var(height_set))
@@ -194,13 +212,6 @@ def extract_features(iter,savepath):
                 height_statistics.append(1 if height_set[3] >= np.max(height_set) else 0)
                 height_statistics.append(np.max(height_set) - height_set[3])
                 height_statistics.append(height_set[3] - np.min(height_set))
-
-            # height_statistics.append(np.mean(height_set2))
-            # height_statistics.append(np.var(height_set2))
-            # height_statistics.append(np.ptp(height_set2))
-            # height_statistics.append(1 if height_set2[3] >= np.max(height_set2) else 0)
-            # height_statistics.append(np.max(height_set2) - height_set2[3])
-            # height_statistics.append(height_set2[3] - np.min(height_set2))
 
             new_features.extend(lables[s])
             new_features.extend(ring)
@@ -217,7 +228,7 @@ def extract_features(iter,savepath):
         print("----------time={:.2f}-----------".format(clock()-start))
     file.close()
 
-batch_size = 100
+batch_size = 500
 centre_step = 1
 local_step1 = 10
 local_step2 = 20
@@ -227,8 +238,8 @@ local_step3 = 50
 train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\train_shuffle.txt"
 test_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_testA\\data_new\\CIKM2017_testA\\testA.txt"
 
-svae_train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_train10_3.csv"
-svae_test_path =  "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_test10_3.csv"
+svae_train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_train10_4.csv"
+svae_test_path =  "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_test10_4.csv"
 
 train_iter = read_data_sets(train_path,batch_size)
 extract_features(train_iter,svae_train_path)
@@ -239,8 +250,8 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import mean_squared_error
 
-train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_train10_3.csv"
-test_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_test10_3.csv"
+train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_train10_4.csv"
+test_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_test10_4.csv"
 data = pd.read_csv(train_path,header=None)
 # test_data = pd.read_csv(test_path,header=None)
 # test = test_data.iloc[:,1:]
