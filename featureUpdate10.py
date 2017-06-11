@@ -139,7 +139,7 @@ def extract_features(iter,savepath):
                 centre.append(c)
 
                 # 2.提取局部区域的平均反射率
-                for step in [10,20,50]:
+                for step in [20,50,100]:
                     local_variance = []
                     for row in range(0, 101, step):
                         if row == 100:
@@ -156,6 +156,11 @@ def extract_features(iter,savepath):
                             for time in sample[:, h, row:row + step, col:col + step]:
                                 local_sum_list.append(np.average(time))
                             local.append(np.var(local_sum_list))
+                            local.append(np.mean(local_sum_list))
+                            local.append(np.ptp(local_sum_list))
+                            centre.append(1 if local_sum_list[14] >= np.max(local_sum_list) else 0)
+                            centre.append(np.max(local_sum_list) - local_sum_list[14])
+                            centre.append(local_sum_list[14] - np.min(local_sum_list))
                             if step != 10:
                                 A = np.vstack([np.arange(15), np.ones(15)]).T
                                 m, c = np.linalg.lstsq(A, np.array(local_sum_list))[0]
@@ -177,6 +182,26 @@ def extract_features(iter,savepath):
                 frequency.append(np.sum((last_time_map[h] > 140) & (last_time_map[h] <= 160)))
                 frequency.append(np.sum((last_time_map[h] > 160)))
 
+                # 最后一个时序高度的统计特性：
+                height_set1.append(np.average(last_time_map[h, 45:56, 45:56]))
+                height_set2.append(np.average(last_time_map[h, 40:61, 40:61]))
+                height_set3.append(np.average(last_time_map[h]))
+                # 最后一个时序高度的统计特性：
+            for height_set in [height_set1,height_set2,height_set3]:
+                height_statistics.append(np.mean(height_set))
+                height_statistics.append(np.var(height_set))
+                height_statistics.append(np.ptp(height_set))
+                height_statistics.append(1 if height_set[3] >= np.max(height_set) else 0)
+                height_statistics.append(np.max(height_set) - height_set[3])
+                height_statistics.append(height_set[3] - np.min(height_set))
+
+            # height_statistics.append(np.mean(height_set2))
+            # height_statistics.append(np.var(height_set2))
+            # height_statistics.append(np.ptp(height_set2))
+            # height_statistics.append(1 if height_set2[3] >= np.max(height_set2) else 0)
+            # height_statistics.append(np.max(height_set2) - height_set2[3])
+            # height_statistics.append(height_set2[3] - np.min(height_set2))
+
             new_features.extend(lables[s])
             new_features.extend(ring)
             new_features.extend(centre)
@@ -184,6 +209,7 @@ def extract_features(iter,savepath):
             new_features.extend(map_variance)
             new_features.extend(local)
             new_features.extend(frequency)
+            new_features.extend(height_statistics)
             batch_features.append(new_features)
 
         batch_features = np.array(batch_features)
@@ -201,8 +227,8 @@ local_step3 = 50
 train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\train_shuffle.txt"
 test_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_testA\\data_new\\CIKM2017_testA\\testA.txt"
 
-svae_train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_train10_2.csv"
-svae_test_path =  "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_test10_2.csv"
+svae_train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_train10_3.csv"
+svae_test_path =  "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_test10_3.csv"
 
 train_iter = read_data_sets(train_path,batch_size)
 extract_features(train_iter,svae_train_path)
@@ -213,8 +239,8 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import mean_squared_error
 
-train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_train10_2.csv"
-test_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_test10_2.csv"
+train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_train10_3.csv"
+test_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_test10_3.csv"
 data = pd.read_csv(train_path,header=None)
 # test_data = pd.read_csv(test_path,header=None)
 # test = test_data.iloc[:,1:]
