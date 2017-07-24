@@ -54,7 +54,7 @@ def extract_features(iter,savepath):
             centre = []
             frequency = []
             bit_map = []
-            map_variance = []
+            #逐层提取特征
             for h in range(0,4):
                 #15个时间点的一圈圈总量
                 sum_set = []
@@ -133,11 +133,6 @@ def extract_features(iter,savepath):
                 centre_average_set = []
                 for time in sample[:,h,40:61,40:61]:
                     centre_average_set.append(np.average(time))
-                    map_variance.append(np.var(time))
-                #差分
-                centre.extend(np.diff(centre_average_set, 1))
-                centre.extend(np.diff(centre_average_set, 2))
-
                 centre.append(centre_average_set[14])
                 centre.append(np.var(centre_average_set))
                 centre.append(np.mean(centre_average_set))
@@ -149,7 +144,6 @@ def extract_features(iter,savepath):
                 centre_average_set = []
                 for time in sample[:, h, 20:81, 20:81]:
                     centre_average_set.append(np.average(time))
-                    map_variance.append(np.var(time))
                 centre.append(centre_average_set[14])
                 centre.append(np.var(centre_average_set))
                 centre.append(np.mean(centre_average_set))
@@ -161,11 +155,6 @@ def extract_features(iter,savepath):
                 centre_average_set = []
                 for time in sample[:, h, 45:56, 45:56]:
                     centre_average_set.append(np.average(time))
-                    map_variance.append(np.var(time))
-
-                centre.extend(np.diff(centre_average_set,1))
-                centre.extend(np.diff(centre_average_set, 2))
-
                 centre.append(centre_average_set[14])
                 centre.append(np.var(centre_average_set))
                 centre.append(np.mean(centre_average_set))
@@ -188,14 +177,12 @@ def extract_features(iter,savepath):
                 #增加20*20个点
                 bit_map.extend(last_time_map[h,40:61,40:61].ravel())
 
-
             new_features.extend(lables[s])
             new_features.extend(ring)
             new_features.extend(local)
             new_features.extend(centre)
             new_features.extend(frequency)
             new_features.extend(bit_map)
-            new_features.extend(map_variance)
             batch_features.append(new_features)
         batch_features = np.array(batch_features)
         np.savetxt(file,batch_features,fmt='%.2f', delimiter=',')
@@ -211,47 +198,10 @@ local_step2 = 50
 train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\train_shuffle.txt"
 test_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_testA\\data_new\\CIKM2017_testA\\testA.txt"
 
-svae_train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_train7_diff.csv"
-svae_test_path =  "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_test7_diff.csv"
+svae_train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_train8.csv"
+svae_test_path =  "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_test8.csv"
 
 train_iter = read_data_sets(train_path,batch_size)
 extract_features(train_iter,svae_train_path)
 test_iter = read_data_sets(test_path,batch_size)
 extract_features(test_iter,svae_test_path)
-
-import numpy as np
-import sklearn as sk
-import pandas as pd
-
-from sklearn import linear_model
-
-from sklearn.linear_model import Ridge, RidgeCV, ElasticNet, LassoCV, LassoLarsCV
-from sklearn.model_selection import cross_val_score
-from sklearn.metrics import mean_squared_error
-
-train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_train7_diff.csv"
-test_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_test7_diff.csv"
-data = pd.read_csv(train_path,header=None)
-# test_data = pd.read_csv(test_path,header=None)
-# test = test_data.iloc[:,1:]
-
-lable = data.iloc[:,0]
-train = data.iloc[:,1:]
-
-# def rmse_cv(model,X,y):
-#     rmse= np.sqrt(-cross_val_score(model, X, y, scoring="neg_mean_squared_error", cv = 5))
-#     return(rmse)
-
-from sklearn.ensemble import GradientBoostingRegressor
-n_estimators=[85,90,100,150]
-
-for n in n_estimators:
-    print("n_estimators={}".format(n))
-    reg = GradientBoostingRegressor(n_estimators=n, learning_rate=0.1,max_depth= 2, random_state=0, loss='ls')
-    reg.fit(train.iloc[2000:], lable.iloc[2000:])
-    pred = reg.predict(train.iloc[:2000])
-    rsme = np.sqrt(mean_squared_error(pred,lable.iloc[:2000]))
-    print("test pred:{}".format(rsme))
-    train_pred = reg.predict(train.iloc[2000:4000])
-    train_rmse = np.sqrt(mean_squared_error(train_pred,lable.iloc[2000:4000]))
-    print("train pred:{}".format(train_rmse))

@@ -1,0 +1,271 @@
+featureUpdate6:四层数据，时序波动特征，中心20*20个点特征
+max_depth = 3
+n_estimators=100
+test pred:12.623681681623
+train pred:11.573620871432695
+n_estimators=150
+test pred:12.317659830997428
+train pred:10.720445544796865
+n_estimators=180
+test pred:12.208551919586299
+train pred:10.286177731502873
+n_estimators=200
+test pred:12.145938939596897
+train pred:9.990710964429967
+n_estimators=300
+test pred:11.956212055111502
+train pred:8.877026045679548
+
+#
+featureUpdate6 learning_rate=0.2
+n_estimators=100
+test pred:12.403705478463547
+train pred:9.964415337003672
+n_estimators=150
+test pred:12.211558197477899
+train pred:8.820394682794719
+n_estimators=180
+test pred:12.134433143248971
+train pred:8.272877542770784
+n_estimators=200
+test pred:12.099284451670718
+train pred:7.955848401303026
+n_estimators=300
+test pred:11.868172598526131
+train pred:6.596863362624191
+
+#
+featureUpdate2 learning_rate=0.2
+n_estimators=100
+test pred:12.70641711939246
+train pred:10.431358393102265
+n_estimators=150
+test pred:12.459133188146383
+train pred:9.097374177122942
+n_estimators=180
+test pred:12.371916719027164
+train pred:8.465162521131331
+n_estimators=200
+test pred:12.318136914944857
+train pred:8.090355076936463
+n_estimators=300
+test pred:12.183165433923184
+train pred:6.503274517322605
+
+#
+random forest 20
+test pred:12.104646685260995
+train pred:4.690074445038159
+
+#featureUpdate7
+n_estimators=100
+test pred:12.511569266405072
+train pred:11.468932697550247
+
+#featureUpdate8
+n_estimators=100
+test pred:12.598992289426565
+train pred:11.52581011319261
+n_estimators=150
+test pred:12.372631817875744
+train pred:10.73342254237062
+n_estimators=180
+test pred:12.245633177402098
+train pred:10.295530853961504
+n_estimators=200
+test pred:12.203993002151494
+train pred:10.01964103101855
+n_estimators=300
+test pred:11.955014968315712
+train pred:8.896421731556167
+11.0121736589
+
+#
+feature_update_train7 max = 2
+n_estimators=85
+learning_rate=0.1
+test pred:13.145149877814049
+train pred:13.043230214878472
+n_estimators=90
+learning_rate=0.1
+test pred:13.11939406310709
+train pred:12.9966327341424
+n_estimators=100
+learning_rate=0.1
+test pred:13.065093535271114
+train pred:12.894628182113141
+n_estimators=120
+learning_rate=0.1
+test pred:12.996149018972739
+train pred:12.63867189456957
+
+#featureUpdate9 max =2
+n_estimators=90
+learning_rate=0.1
+test pred:13.113375581148345
+train pred:12.997301441807453
+n_estimators=100
+learning_rate=0.1
+test pred:13.063530048223345
+train pred:12.906313042863461
+n_estimators=120
+learning_rate=0.1
+test pred:12.998649518223969
+train pred:12.655903549975468
+
+#
+feature_update_train7 max = 2 80
+learning_rate=0.1
+test pred:13.154279394817765
+train pred:13.163041065271548
+
+#
+feature_update_train9 max = 2
+n_estimators=60
+learning_rate=0.1
+test pred:13.284394579922454
+train pred:13.450612394192735
+n_estimators=50
+learning_rate=0.1
+test pred:13.351583503255181
+train pred:13.6749400911764
+n_estimators=40
+learning_rate=0.1
+test pred:13.495396256673521
+train pred:13.9056013769743
+
+#
+feature_update_train9 max = 3
+n_estimators=40
+learning_rate=0.1
+test pred:13.00302623825569
+train pred:12.948496769442505
+n_estimators=36
+learning_rate=0.1
+test pred:13.052810680081569
+train pred:13.067498235937808
+n_estimators=30
+learning_rate=0.1
+test pred:13.159532377700373
+train pred:13.296807942161482
+n_estimators=20
+learning_rate=0.1
+test pred:13.4241057072059
+train pred:13.844570380205843
+n_estimators=10
+learning_rate=0.1
+test pred:13.930656800771468
+train pred:14.58340923946873
+
+#featureUpdate10_2
+n_estimators=50
+test pred:13.381558185397957
+train pred:13.637190443866292
+n_estimators=60
+test pred:13.268645827169548
+train pred:13.408712900830752
+n_estimators=70
+test pred:13.17660440527657
+train pred:13.256819740521971
+n_estimators=80
+test pred:13.095511516784121
+train pred:13.09926500685547
+n_estimators=100
+test pred:12.962584924444837
+train pred:12.848624720657144
+
+#featureUpdate10_3
+n_estimators=50
+max_depth=2
+test pred:13.28625313790449     score 13.6
+train pred:13.625511265589333
+n_estimators=60
+max_depth=2
+test pred:13.165629560197472
+train pred:13.396882279747524
+n_estimators=70
+max_depth=2
+test pred:13.064558161833299
+train pred:13.241448676505621
+n_estimators=80
+max_depth=2
+test pred:13.00309265025689
+train pred:13.071901631692475
+n_estimators=90
+max_depth=2
+test pred:12.955022540783034
+train pred:12.944752629141579
+n_estimators=100
+max_depth=2
+test pred:12.902901751730457
+train pred:12.845060491232283
+
+#featureUpdate10_4
+n_estimators=50
+test pred:13.332917824364422
+train pred:13.596363229445517
+n_estimators=60
+test pred:13.213487528079883
+train pred:13.396176165439513
+n_estimators=70
+test pred:13.10819335098783
+train pred:13.232742431772904
+n_estimators=80
+test pred:13.028332928142436
+train pred:13.05872852961913
+n_estimators=100
+test pred:12.86919017601814
+train pred:12.791915988739184
+
+#featureUpdate9_copy
+(17770, 3261)
+max_depth=3
+estimators=150
+velify:
+12.5334900921
+train:
+11.3776224998
+estimators=200
+velify:
+11.550748202
+train:
+10.1344264144
+max_depth=4
+estimators=150
+velify:
+10.1836276086
+train:
+8.34158042085
+estimators=200
+velify:
+9.37591981994
+train:
+7.20248574924
+
+(12331, 3261)
+[1109 1648 6771 ...,  603 8275 1578]
+max_depth=3
+estimators=150
+velify:
+10.6453847159
+train:
+11.2729932001
+estimators=200
+velify:
+9.9414817475
+train:
+10.389250062
+max_depth=4
+estimators=150
+velify:
+8.75527324868
+train:
+8.97797705027
+estimators=200
+velify:
+7.86024826823
+train:
+7.88008217996
+
+
+

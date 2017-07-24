@@ -49,6 +49,13 @@ def extract_features(iter,savepath):
             print("------------sample{}---------------".format(s))
             last_time_map = sample[14,:,:,:]
             new_features = []
+            # 1.最后一个时序的4个高度环范围反射率平均值特征,包括15个时序的变化统计特征：方差，极值，趋势，
+            # 2.最后一个时序的4个高度局部范围反射率平均值特征，
+            # 3.中心范围的特征20*20，,4*40,10*10,101*101
+            # 4.统计各反射率频数
+            # 5.选取中心小区域所有反射率作为特征
+            # 6.局部的数据的方差
+            # 7.高度之间的联系
             ring = []
             local = []
             centre = []
@@ -56,41 +63,47 @@ def extract_features(iter,savepath):
             bit_map = []
             map_variance = []
             height_statistics = []
-            #逐层提取特征
             height_set1 = []
             height_set2 = []
             height_set3 = []
             for h in range(0,4):
                 #15个时间点的一圈圈总量
-                sum_set = []
-                for t in range(15):
-                    #51圈中心总量
-                    each_time_sum = []
-                    for k in range(0, 51, centre_step):
-                        each_time_sum.append(np.sum(sample[t,h,k:101-k,k:101-k]))
-                    sum_set.append(each_time_sum)
+                # sum_set = []
+                # for t in range(15):
+                #     #51圈中心总量
+                #     each_time_sum = []
+                #     for k in range(0, 51, centre_step):
+                #         each_time_sum.append(np.sum(sample[t,h,k:101-k,k:101-k]))
+                #     sum_set.append(each_time_sum)
+                #
+                # #提取一环环的变化：
+                # ring_set = []
+                # for t in range(15):
+                #     each_time_ring = []
+                #     for a in range(0, 50, 2):
+                #         each_time_ring.append((sum_set[t][a] - sum_set[t][a+2])/((101-2*a)**2-(101-2*a-4)**2))#25个环
+                #     ring_set.append(each_time_ring)
 
-                #提取一圈圈的变化：
-                ring_set = []
-                for t in range(15):
-                    each_time_ring = []
-                    for a in range(0, 50, 2):
-                        each_time_ring.append((sum_set[t][a] - sum_set[t][a+2])/((101-2*a)**2-(101-2*a-4)**2))
-                    ring_set.append(each_time_ring)
-                #加入最后一个时间点的特征
-                ring.extend(ring_set[14])
-
-
-                for a in range(25):
-                    group = []
-                    for t in range(15):
-                        group.append(ring_set[t][a])
-                    ring.append(np.var(group))
-                    ring.append(np.mean(group))
-                    ring.append(np.ptp(group))
-                    ring.append(1 if group[14] >= np.max(group) else 0)
-                    ring.append(np.max(group) - group[14])
-                    ring.append(group[14] - np.min(group))
+                each_time_sum = []
+                for k in range(0, 51, centre_step):
+                    each_time_sum.append(np.sum(sample[14, h, k:101 - k, k:101 - k]))
+                each_time_ring = []
+                for a in range(0, 50, 2):
+                    each_time_ring.append(
+                        (each_time_sum[a] - each_time_sum[a + 2]) / ((101 - 2 * a) ** 2 - (101 - 2 * a - 4) ** 2))
+                #加入最后一个时间点的环特征
+                ring.extend(each_time_ring)
+                #提取15个时序环的统计特性，
+                # for a in range(25):
+                #     group = []
+                #     for t in range(15):
+                #         group.append(ring_set[t][a])
+                #     ring.append(np.var(group))
+                #     ring.append(np.mean(group))
+                #     ring.append(np.ptp(group))
+                #     ring.append(1 if group[14] >= np.max(group) else 0)
+                #     ring.append(np.max(group) - group[14])
+                #     ring.append(group[14] - np.min(group))
 
                 # 2.提取局部区域的平均反射率5*5=25
                 for row in range(0, 101, local_step1):
@@ -192,16 +205,11 @@ def extract_features(iter,savepath):
             height_statistics.append(np.mean(height_set1))
             height_statistics.append(np.var(height_set1))
             height_statistics.append(np.ptp(height_set1))
-            height_statistics.append(1 if height_set1[3] >= np.max(height_set1) else 0)
-            height_statistics.append(np.max(height_set1) - height_set1[3])
-            height_statistics.append(height_set1[3] - np.min(height_set1))
 
             height_statistics.append(np.mean(height_set2))
             height_statistics.append(np.var(height_set2))
             height_statistics.append(np.ptp(height_set2))
-            height_statistics.append(1 if height_set2[3] >= np.max(height_set2) else 0)
-            height_statistics.append(np.max(height_set2) - height_set2[3])
-            height_statistics.append(height_set2[3] - np.min(height_set2))
+
 
 
             new_features.extend(lables[s])
@@ -225,10 +233,10 @@ local_step2 = 50
 
 
 train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\train_shuffle.txt"
-test_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_testA\\data_new\\CIKM2017_testA\\testA.txt"
+test_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_testB\\data_new\\CIKM2017_testB\\testB.txt"
 
-svae_train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_train9.csv"
-svae_test_path =  "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_test9.csv"
+svae_train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_trainB9.csv"
+svae_test_path =  "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_testB9.csv"
 
 train_iter = read_data_sets(train_path,batch_size)
 extract_features(train_iter,svae_train_path)
@@ -236,34 +244,24 @@ test_iter = read_data_sets(test_path,batch_size)
 extract_features(test_iter,svae_test_path)
 
 import numpy as np
-import sklearn as sk
 import pandas as pd
-
-from sklearn import linear_model
-
-from sklearn.linear_model import Ridge, RidgeCV, ElasticNet, LassoCV, LassoLarsCV
-from sklearn.model_selection import cross_val_score
 from sklearn.metrics import mean_squared_error
 
-train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_train9.csv"
-test_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_test9.csv"
+train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_trainB9.csv"
+test_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_testB9.csv"
 data = pd.read_csv(train_path,header=None)
-# test_data = pd.read_csv(test_path,header=None)
-# test = test_data.iloc[:,1:]
+test_data = pd.read_csv(test_path,header=None)
+test = test_data.iloc[:,1:]
 
 lable = data.iloc[:,0]
 train = data.iloc[:,1:]
 
-# def rmse_cv(model,X,y):
-#     rmse= np.sqrt(-cross_val_score(model, X, y, scoring="neg_mean_squared_error", cv = 5))
-#     return(rmse)
-
 from sklearn.ensemble import GradientBoostingRegressor
-n_estimators=[100,150,180,200,300,]
+n_estimators=[50,100,150,180,200]
 
 for n in n_estimators:
     print("n_estimators={}".format(n))
-    reg = GradientBoostingRegressor(n_estimators=n, learning_rate=0.1,random_state=0, loss='ls')
+    reg = GradientBoostingRegressor(n_estimators=n, learning_rate=0.1,max_depth=2,random_state=0, loss='ls')
     reg.fit(train.iloc[2000:], lable.iloc[2000:])
     pred = reg.predict(train.iloc[:2000])
     rsme = np.sqrt(mean_squared_error(pred,lable.iloc[:2000]))
@@ -271,3 +269,8 @@ for n in n_estimators:
     train_pred = reg.predict(train.iloc[2000:4000])
     train_rmse = np.sqrt(mean_squared_error(train_pred,lable.iloc[2000:4000]))
     print("train pred:{}".format(train_rmse))
+
+reg = GradientBoostingRegressor(n_estimators=50, learning_rate=0.1,max_depth=2,random_state=0, loss='ls')
+reg.fit(train, lable)
+res = reg.predict(test)
+pd.DataFrame(res).to_csv("F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\results\\gbdt_result_updateB9.csv",header=False,index=False)

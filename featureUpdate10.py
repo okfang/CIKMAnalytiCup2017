@@ -96,10 +96,6 @@ def extract_features(iter,savepath):
                     ring.append(1 if group[14] >= np.max(group) else 0)
                     ring.append(np.max(group) - group[14])
                     ring.append(group[14] - np.min(group))
-                    #斜率
-                    A = np.vstack([np.arange(15), np.ones(15)]).T
-                    m, c = np.linalg.lstsq(A, np.array(group))[0]
-                    ring.append(m)
 
                 #中心范围的特征(4*7+4*15+4*15)*2
                 centre_average_set = []
@@ -115,11 +111,6 @@ def extract_features(iter,savepath):
                 centre.append(np.max(centre_average_set) - centre_average_set[14])
                 centre.append(centre_average_set[14] - np.min(centre_average_set))
 
-                #15个时序的斜率和截距
-                A = np.vstack([np.arange(15), np.ones(15)]).T
-                m, c = np.linalg.lstsq(A, np.array(centre_average_set))[0]
-                centre.append(m)
-
                 centre_average_set = []
                 for time in sample[:, h, 40:61, 40:61]:
                     centre_average_set.append(np.average(time))
@@ -132,10 +123,6 @@ def extract_features(iter,savepath):
                 centre.append(np.max(centre_average_set) - centre_average_set[14])
                 centre.append(centre_average_set[14] - np.min(centre_average_set))
 
-                # 15个时序的斜率和截距
-                A = np.vstack([np.arange(15), np.ones(15)]).T
-                m, c = np.linalg.lstsq(A, np.array(centre_average_set))[0]
-                centre.append(m)
 
                 # 2.提取局部区域的平均反射率
                 for step in [20,50,100]:
@@ -162,43 +149,25 @@ def extract_features(iter,savepath):
                             local.append(np.max(local_sum_list) - local_sum_list[14])
                             local.append(local_sum_list[14] - np.min(local_sum_list))
 
-                            A = np.vstack([np.arange(15), np.ones(15)]).T
-                            m, c = np.linalg.lstsq(A, np.array(local_sum_list))[0]
-                            local.append(m)
-                    # 只加入最后一个时序的局部数据
+                    # 只加入最后一个时序的局部数据方差
                     map_variance.append(np.var(local_average))
-
-                #通过局部平均值的方差沿时间变化，提取整体的变化趋势
-                for step in [10,20,50]:
-                    local_variance = []
-                    for t in range(15):
-                            local_average = []
-                            for row in range(0, 101, step):
-                                if row == 100:
-                                    break
-                                for col in range(0, 101, step):
-                                    if col == 100:
-                                        break
-                                    #每个时间点的局部平均值
-                                    local_average.append(np.average(sample[t, h, row:row + step, col:col + step]))
-                            local_variance.append(np.var(local_average))
-                    A = np.vstack([np.arange(15), np.ones(15)]).T
-                    m, c = np.linalg.lstsq(A, np.array(local_variance))[0]
-                    local.append(m)
 
                 # 增加中心20*20=400个点
                 bit_map.extend(last_time_map[h, 40:61, 40:61].ravel())
 
-                #增加五个特征4*9= 36
-                frequency.append(np.sum(last_time_map[h] <= 20))
-                frequency.append(np.sum((last_time_map[h] > 20) & (last_time_map[h] <= 40)))
-                frequency.append(np.sum((last_time_map[h] > 40) & (last_time_map[h] <= 60)))
-                frequency.append(np.sum((last_time_map[h] > 60) & (last_time_map[h] <= 80)))
-                frequency.append(np.sum((last_time_map[h] > 80) & (last_time_map[h] <= 100)))
-                frequency.append(np.sum((last_time_map[h] > 100) & (last_time_map[h] <= 120)))
-                frequency.append(np.sum((last_time_map[h] > 120) & (last_time_map[h] <= 140)))
-                frequency.append(np.sum((last_time_map[h] > 140) & (last_time_map[h] <= 160)))
-                frequency.append(np.sum((last_time_map[h] > 160)))
+                #15个图的频率特征
+                for a in range(0, 201, 20):
+                    frequency_variance = []
+                    for time in sample[:,h]:
+                        frequency.append(np.sum((time > a) & (time <= a + 20)))
+                        frequency_variance.append(np.sum((time > a) & (time <= a + 20)))
+                    frequency.append(1 if frequency_variance[14] >= np.max(frequency_variance) else 0)
+                frequency_variance = []
+                for time in sample[:, h]:
+                    frequency.append(np.sum(time == 0))
+                    frequency_variance.append(np.sum(time == 0))
+                frequency.append(1 if frequency_variance[14] >= np.max(frequency_variance) else 0)
+
 
                 # 最后一个时序高度的统计特性：
                 height_set1.append(np.average(last_time_map[h, 45:56, 45:56]))
@@ -236,13 +205,13 @@ local_step3 = 50
 
 
 train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\train_shuffle.txt"
-test_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_testA\\data_new\\CIKM2017_testA\\testA.txt"
+test_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_testB\\data_new\\CIKM2017_testB\\testB.txt"
 
-svae_train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_train10_4.csv"
-svae_test_path =  "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_test10_4.csv"
+svae_train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_train10_5.csv"
+svae_test_path =  "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_testB10_5.csv"
 
-train_iter = read_data_sets(train_path,batch_size)
-extract_features(train_iter,svae_train_path)
+# train_iter = read_data_sets(train_path,batch_size)
+# extract_features(train_iter,svae_train_path)
 test_iter = read_data_sets(test_path,batch_size)
 extract_features(test_iter,svae_test_path)
 
@@ -250,11 +219,11 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import mean_squared_error
 
-train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_train10_4.csv"
-test_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_test10_4.csv"
+train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_train10_5.csv"
+test_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_testB10_5.csv"
 data = pd.read_csv(train_path,header=None)
-# test_data = pd.read_csv(test_path,header=None)
-# test = test_data.iloc[:,1:]
+test_data = pd.read_csv(test_path,header=None)
+test = test_data.iloc[:,1:]
 
 lable = data.iloc[:,0]
 train = data.iloc[:,1:]
@@ -272,3 +241,8 @@ for n in n_estimators:
     train_pred = reg.predict(train.iloc[2000:4000])
     train_rmse = np.sqrt(mean_squared_error(train_pred,lable.iloc[2000:4000]))
     print("train pred:{}".format(train_rmse))
+
+reg = GradientBoostingRegressor(n_estimators=50, learning_rate=0.1,max_depth=2,random_state=0, loss='ls')
+reg.fit(train, lable)
+res = reg.predict(test)
+pd.DataFrame(res).to_csv("F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\results\\gbdt_result_updateB10_5.csv",header=False,index=False)

@@ -55,6 +55,7 @@ def extract_features(iter,savepath):
             frequency = []
             bit_map = []
             map_variance = []
+            #逐层提取特征
             for h in range(0,4):
                 #15个时间点的一圈圈总量
                 sum_set = []
@@ -120,7 +121,7 @@ def extract_features(iter,savepath):
 
                 #5.提取中心区域的反射量增减和方差,20*20 范围的中心区域 4*16=64
                 centre_average_set = []
-                for time in sample:
+                for time in sample[:,h,:,:]:
                     centre_average_set.append(np.average(time))
                 centre.append(centre_average_set[14])
                 centre.append(np.var(centre_average_set))
@@ -134,10 +135,6 @@ def extract_features(iter,savepath):
                 for time in sample[:,h,40:61,40:61]:
                     centre_average_set.append(np.average(time))
                     map_variance.append(np.var(time))
-                #差分
-                centre.extend(np.diff(centre_average_set, 1))
-                centre.extend(np.diff(centre_average_set, 2))
-
                 centre.append(centre_average_set[14])
                 centre.append(np.var(centre_average_set))
                 centre.append(np.mean(centre_average_set))
@@ -162,10 +159,6 @@ def extract_features(iter,savepath):
                 for time in sample[:, h, 45:56, 45:56]:
                     centre_average_set.append(np.average(time))
                     map_variance.append(np.var(time))
-
-                centre.extend(np.diff(centre_average_set,1))
-                centre.extend(np.diff(centre_average_set, 2))
-
                 centre.append(centre_average_set[14])
                 centre.append(np.var(centre_average_set))
                 centre.append(np.mean(centre_average_set))
@@ -175,16 +168,16 @@ def extract_features(iter,savepath):
                 centre.append(centre_average_set[14] - np.min(centre_average_set))
 
 
-                #增加五个特征4*5 = 20
+                #增加最后一个时序频数特征
                 frequency.append(np.sum(last_time_map[h] <= 20))
-                frequency.append(np.sum((last_time_map[h] > 20) & (last_time_map[h] <= 40)))
-                frequency.append(np.sum((last_time_map[h] > 40) & (last_time_map[h] <= 60)))
-                frequency.append(np.sum((last_time_map[h] > 60) & (last_time_map[h] <= 80)))
-                frequency.append(np.sum((last_time_map[h] > 80) & (last_time_map[h] <= 100)))
-                frequency.append(np.sum((last_time_map[h] > 100) & (last_time_map[h] <= 120)))
-                frequency.append(np.sum((last_time_map[h] > 120) & (last_time_map[h] <= 140)))
-                frequency.append(np.sum((last_time_map[h] > 140) & (last_time_map[h] <= 160)))
-                frequency.append(np.sum((last_time_map[h] > 160)))
+                frequency.append(np.sum((last_time_map[h]  > 20) & (last_time_map[h] <= 40)))
+                frequency.append(np.sum((last_time_map[h]  > 40) & (last_time_map[h]  <= 60)))
+                frequency.append(np.sum((last_time_map[h]  > 60) & (last_time_map[h]  <= 80)))
+                frequency.append(np.sum((last_time_map[h]  > 80) & (last_time_map[h]  <= 100)))
+                frequency.append(np.sum((last_time_map[h]  > 100) & (last_time_map[h]  <= 120)))
+                frequency.append(np.sum((last_time_map[h]  > 120) & (last_time_map[h]  <= 140)))
+                frequency.append(np.sum((last_time_map[h]  > 140) & (last_time_map[h]  <= 160)))
+                frequency.append(np.sum((last_time_map[h]  > 160)))
                 #增加20*20个点
                 bit_map.extend(last_time_map[h,40:61,40:61].ravel())
 
@@ -211,8 +204,8 @@ local_step2 = 50
 train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\train_shuffle.txt"
 test_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_testA\\data_new\\CIKM2017_testA\\testA.txt"
 
-svae_train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_train7_diff.csv"
-svae_test_path =  "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_test7_diff.csv"
+svae_train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_train8.csv"
+svae_test_path =  "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_test8.csv"
 
 train_iter = read_data_sets(train_path,batch_size)
 extract_features(train_iter,svae_train_path)
@@ -229,9 +222,9 @@ from sklearn.linear_model import Ridge, RidgeCV, ElasticNet, LassoCV, LassoLarsC
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import mean_squared_error
 
-train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_train7_diff.csv"
-test_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_test7_diff.csv"
-data = pd.read_csv(train_path,header=None)
+feature_train_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_train8.csv"
+feature_test_path = "F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\new_features\\feature_update_test8.csv"
+data = pd.read_csv(feature_train_path,header=None)
 # test_data = pd.read_csv(test_path,header=None)
 # test = test_data.iloc[:,1:]
 
@@ -243,11 +236,11 @@ train = data.iloc[:,1:]
 #     return(rmse)
 
 from sklearn.ensemble import GradientBoostingRegressor
-n_estimators=[85,90,100,150]
+n_estimators=[100,150,180,200,300,]
 
 for n in n_estimators:
     print("n_estimators={}".format(n))
-    reg = GradientBoostingRegressor(n_estimators=n, learning_rate=0.1,max_depth= 2, random_state=0, loss='ls')
+    reg = GradientBoostingRegressor(n_estimators=n, learning_rate=0.1,random_state=0, loss='ls')
     reg.fit(train.iloc[2000:], lable.iloc[2000:])
     pred = reg.predict(train.iloc[:2000])
     rsme = np.sqrt(mean_squared_error(pred,lable.iloc[:2000]))
@@ -255,3 +248,16 @@ for n in n_estimators:
     train_pred = reg.predict(train.iloc[2000:4000])
     train_rmse = np.sqrt(mean_squared_error(train_pred,lable.iloc[2000:4000]))
     print("train pred:{}".format(train_rmse))
+
+
+test_data = pd.read_csv(feature_test_path,header=None)
+test = test_data.iloc[:,1:]
+
+reg = GradientBoostingRegressor(n_estimators=100, learning_rate=0.1, random_state=0, loss='ls')
+reg.fit(train, lable)
+pred = reg.predict(train.iloc[:2000])
+rmse = np.sqrt(mean_squared_error(pred,lable.iloc[:2000]))
+print(rmse)
+#
+res = reg.predict(test)
+pd.DataFrame(res).to_csv("F:\\data\\tianchi\\CIKM2017\\CIKM2017_train\\data_new\\CIKM2017_train\\results\\gbdt_result_update8_100.csv",header=False,index=False)
